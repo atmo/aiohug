@@ -2,10 +2,13 @@ from asyncio import iscoroutine
 from inspect import signature, Parameter, isclass, getfullargspec
 from typing import Optional
 
+import marshmallow
 from aiohttp import web
 from marshmallow import ValidationError, fields, Schema
 
 from .directives import get_directive
+
+MARSHMALLOW_MAJOR_VERSION = marshmallow.__version_info__[0]
 
 
 def get_default_args(func):
@@ -54,6 +57,11 @@ def cast_arg(arg, kind: Optional = None):
         arg = kind().deserialize(arg)
     # arg: RequestSchema
     elif isclass(kind) and issubclass(kind, Schema):
+        schema_instance =
+        # In marshmallow 2 schemas return tuple (`data`, `errors`) upon loading. They might also raise on invalid data
+        # if configured so, but will still return a tuple.
+        # In marshmallow 3 schemas always raise Validation error on load if input data is invalid and a single
+        # value `data` is returned.
         arg = kind(many=False).dump(arg)  # $strict=True, .marshmallow 3.0 compatibility
     # RequestSchema()
     elif isinstance(kind, Schema):
