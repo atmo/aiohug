@@ -1,6 +1,7 @@
 from aiohttp import web
 from marshmallow import fields, Schema
 from aiohug import RouteTableDef
+from aiohug.output_format import text, html
 
 
 def create_app():
@@ -203,3 +204,39 @@ async def test_default_router_compatibility(aiohttp_client):
 
     aiohttp_resp = await client.get("/aiohttp")
     assert aiohttp_resp.status == 200
+
+
+async def test_route_with_output(aiohttp_client):
+    app = create_app()
+
+    routes = RouteTableDef()
+
+    @routes.get("/foo", output=text)
+    async def foo():
+        return "pong"
+
+    @routes.get("/bar", output=text.options(charset="cp1251"))
+    async def bar():
+        return "pong"
+
+    @routes.get("/baz", output=html)
+    async def baz():
+        return "<html></html>"
+
+    app.add_routes(routes)
+
+    client = await aiohttp_client(app)
+
+    foo_resp = await client.get("/foo")
+    assert foo_resp.status == 200
+    assert foo_resp.content_type == "text/plain"
+    assert foo_resp.charset == "utf-8"
+
+    bar_resp = await client.get("/bar")
+    assert bar_resp.status == 200
+    assert bar_resp.content_type == "text/plain"
+    assert bar_resp.charset == "cp1251"
+
+    bar_resp = await client.get("/baz")
+    assert bar_resp.status == 200
+    assert bar_resp.content_type == "text/html"

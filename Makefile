@@ -18,10 +18,10 @@ ci_test:
 ci_coveralls:
 	GIT_ID="$(CI_COMMIT_SHORT_SHA)" GIT_BRANCH="$(CI_COMMIT_REF_NAME)" COVERALLS_PARALLEL=true coveralls
 
-test: venv
+test:
 	$(VIRTUAL_ENV)/bin/py.test
 
-test_coverage: venv
+test_coverage:
 	$(VIRTUAL_ENV)/bin/py.test --cov-report html:.reports/coverage --cov-config .coveragerc --cov $(PROJECT)
 
 venv_init:
