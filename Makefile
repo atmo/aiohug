@@ -33,6 +33,10 @@ venv_init:
 venv:  venv_init
 	$(VIRTUAL_ENV)/bin/pip install -r $(REQUIREMENTS_TEST)
 
+
+pkg_upload:
+	$(PYTHON) setup.py sdist upload
+
 clean_venv:
 	rm -rf $(VIRTUAL_ENV)
 
